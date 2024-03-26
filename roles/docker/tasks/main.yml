@@ -1,0 +1,72 @@
+- name: Установка пакетов для работы с Docker
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - curl
+    - gnupg-agent
+    - software-properties-common
+
+- name: Добавление официального ключа Docker GPG
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Добавление репозитория Docker в APT
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Установка Docker
+  apt:
+    name: docker-ce
+    state: present
+
+- name: Установка docker-compose
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - docker-compose
+
+- name: Проверяем есть ли папка php
+  stat:
+    path: ./php
+  register: folder_check
+
+- name: Создание папки php, если отсутствует
+  file:
+    path: ./php
+    state: directory
+  when: not folder_check.stat.exists
+
+- name: Загрузка Dockerfile
+  copy:
+    src: templates/Dockerfile
+    dest: ./php/Dockerfile
+
+- name: Проверяем есть ли папка php_code
+  stat:
+    path: ./php/php_code
+  register: folder_check
+
+- name: Создание папки php_code, если отсутствует
+  file:
+    path: ./php/php_code
+    state: directory
+  when: not folder_check.stat.exists
+
+- name: Загрузка index.php
+  copy:
+    src: php_code/index.php
+    dest: ./php/php_code/index.php
+
+- name: Загрузка docker-compose файла
+  copy:
+    src: templates/docker-compose.yml
+    dest: ./docker-compose.yml
+
+- name: Запуск docker-compose
+  command: docker compose up -d --build

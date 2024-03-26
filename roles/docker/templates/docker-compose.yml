@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: ./nginx/
+    container_name: nginx-container
+    ports:
+      - 80:80
+    volumes:
+      - ./php/php_code/:/var/www/html/
+  php:
+    build: ./php/
+    volumes:
+      - ./php/php_code/:/var/www/html/
+    expose:
+      - 9000
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+      MYSQL_USER: myuser
+      MYSQL_PASSWORD: mypassword
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

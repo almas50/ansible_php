@@ -1,0 +1,17 @@
+- name: Проверяем есть ли папка nginx
+  stat:
+    path: ./nginx
+  register: folder_check
+- name: Создание папки, если отсутствует
+  file:
+    path: ./nginx
+    state: directory
+  when: not folder_check.stat.exists
+- name: Копирование файла конфигурации Nginx
+  template:
+    src: templates/default.conf
+    dest: ./nginx/default.conf
+- name: Копирование Dockerfile Nginx
+  copy:
+    src: templates/Dockerfile
+    dest: ./nginx/Dockerfile
